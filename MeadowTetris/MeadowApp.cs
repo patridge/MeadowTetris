@@ -8,6 +8,7 @@ using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Leds;
 using Meadow.Foundation.Sensors.Hid;
+using Meadow.Peripherals.Sensors.Hid;
 using Tetris;
 
 namespace MeadowApp
@@ -51,20 +52,23 @@ namespace MeadowApp
                 game.OnDown(true);
             }
 
-            var pos = await joystick.GetPosition();
-            if (pos == AnalogJoystick.DigitalJoystickPosition.Left)
+            //var pos = await joystick.Position.GetPosition(); // Old...doesn't work anymore.
+            //var pos = await joystick.Read(); // Returns a JoystickPosition, which doesn't work with DigitalJoystickPosition.
+            var pos = joystick.DigitalPosition;
+            //if (pos == AnalogJoystick.DigitalJoystickPosition.Left)
+            if (pos == DigitalJoystickPosition.Left)
             {
                 game.OnLeft();
             }
-            if (pos == AnalogJoystick.DigitalJoystickPosition.Right)
+            if (pos == DigitalJoystickPosition.Right)
             {
                 game.OnRight();
             }
-            if (pos == AnalogJoystick.DigitalJoystickPosition.Up)
+            if (pos == DigitalJoystickPosition.Up)
             {
                 game.OnDown();
             }
-            if (pos == AnalogJoystick.DigitalJoystickPosition.Down)
+            if (pos == DigitalJoystickPosition.Down)
             {
                 game.OnRotate();
                 await Task.Delay(500);
