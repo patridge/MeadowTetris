@@ -8,6 +8,7 @@ using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
 using Meadow.Foundation.Leds;
 using Meadow.Foundation.Sensors.Hid;
+using Meadow.Hardware;
 using Meadow.Peripherals.Sensors.Hid;
 using Tetris;
 
@@ -17,7 +18,11 @@ namespace MeadowApp
     {
         Max7219 display;
         GraphicsLibrary graphics;
-        AnalogJoystick joystick;
+        //AnalogJoystick joystick;
+        IDigitalInputPort portLeft;
+        IDigitalInputPort portUp;
+        IDigitalInputPort portRight;
+        IDigitalInputPort portDown;
         TetrisGame game = new TetrisGame(8, 24);
 
         public MeadowApp()
@@ -36,8 +41,8 @@ namespace MeadowApp
             {
                 tick++;
                 CheckInput(tick);
-                graphics.Clear();
 
+                graphics.Clear();
                 DrawTetrisField();
                 graphics.Show();
 
@@ -45,33 +50,28 @@ namespace MeadowApp
             }
         }
 
-        async Task CheckInput(int tick)
+        void CheckInput(int tick)
         {
             if (tick % (21 - game.Level) == 0)
             {
                 game.OnDown(true);
             }
 
-            //var pos = await joystick.Position.GetPosition(); // Old...doesn't work anymore.
-            //var pos = await joystick.Read(); // Returns a JoystickPosition, which doesn't work with DigitalJoystickPosition.
-            var pos = joystick.DigitalPosition;
-            //if (pos == AnalogJoystick.DigitalJoystickPosition.Left)
-            if (pos == DigitalJoystickPosition.Left)
+            if (portLeft.State == true)
             {
                 game.OnLeft();
             }
-            if (pos == DigitalJoystickPosition.Right)
+            else if (portRight.State == true)
             {
                 game.OnRight();
             }
-            if (pos == DigitalJoystickPosition.Up)
-            {
-                game.OnDown();
-            }
-            if (pos == DigitalJoystickPosition.Down)
+            else if (portUp.State == true)
             {
                 game.OnRotate();
-                await Task.Delay(500);
+            }
+            else if (portDown.State == true)
+            {
+                game.OnDown();
             }
         }
 
@@ -118,7 +118,10 @@ namespace MeadowApp
             graphics = new GraphicsLibrary(display);
             graphics.CurrentFont = new Font4x8();
             graphics.Rotation = GraphicsLibrary.RotationType._180Degrees;
-            joystick = new AnalogJoystick(Device, Device.Pins.A00, Device.Pins.A01, null, true);
+            portLeft = Device.CreateDigitalInputPort(Device.Pins.D12);
+            portUp = Device.CreateDigitalInputPort(Device.Pins.D13);
+            portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
+            portDown = Device.CreateDigitalInputPort(Device.Pins.D11);
         }
     }
 }
