@@ -142,6 +142,11 @@ namespace Tetris
             }
         }
 
+        public event EventHandler<GameLostEventArgs> GameLost;
+        public class GameLostEventArgs : EventArgs
+        {
+            public int Score { get; set; } = 0;
+        }
         public void OnDown(bool setOnFail = false)
         {
             if (IsPositionValid(CurrentPiece.X, CurrentPiece.Y + 1,
@@ -162,6 +167,7 @@ namespace Tetris
                                     Tetraminos[CurrentPiece.PieceType]) == false)
                 {
                     Console.WriteLine($"Game over: {LinesCleared} lines cleared");
+                    GameLost?.Invoke(this, new GameLostEventArgs() { Score = LinesCleared });
                     Reset(); //start a new game
                 }
             }

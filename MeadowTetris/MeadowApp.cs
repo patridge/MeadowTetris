@@ -1,13 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Meadow;
 using Meadow.Devices;
 using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
 using Meadow.Hardware;
 using Tetris;
+using static Tetris.TetrisGame;
 
-namespace MeadowApp
+namespace MeadowTetris
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
@@ -18,17 +21,28 @@ namespace MeadowApp
         IDigitalInputPort portRight;
         IDigitalInputPort portDown;
         TetrisGame game = new TetrisGame(8, 24);
+        GameData gameData;
 
         public MeadowApp()
         {
             Console.WriteLine("Tetris");
 
-            Initialize();
-            StartGameLoop();
+            _ = Task.Run(async () =>
+            {
+                await Initialize();
+            }).ContinueWith((_) =>
+            {
+                StartGameLoop();
+            });
         }
 
-        void Initialize()
+        async Task Initialize()
         {
+            game.GameLost += Game_GameLost;
+            Console.WriteLine("Initializing files.");
+            gameData = await GameData.LoadGameData();
+            Console.WriteLine("Done initializing files...");
+
             Console.WriteLine("Initializing hardware...");
             display = new Max7219(
                 device: Device,
@@ -45,6 +59,15 @@ namespace MeadowApp
             portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
             portDown = Device.CreateDigitalInputPort(Device.Pins.D11);
             Console.WriteLine("Done initializing...");
+        }
+
+        private async void Game_GameLost(object sender, GameLostEventArgs e)
+        {
+            if (gameData.TrySetHighScore(e.Score))
+            {
+                Console.WriteLine($"New high score: {gameData.HighScore}");
+                await GameData.WriteGameData(gameData);
+            }
         }
 
         int tick = 0;
