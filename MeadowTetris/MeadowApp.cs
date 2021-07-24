@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Foundation;
 using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
-using Meadow.Foundation.Leds;
-using Meadow.Foundation.Sensors.Hid;
 using Meadow.Hardware;
-using Meadow.Peripherals.Sensors.Hid;
 using Tetris;
 
 namespace MeadowApp
@@ -18,7 +13,6 @@ namespace MeadowApp
     {
         Max7219 display;
         GraphicsLibrary graphics;
-        //AnalogJoystick joystick;
         IDigitalInputPort portLeft;
         IDigitalInputPort portUp;
         IDigitalInputPort portRight;
@@ -28,15 +22,35 @@ namespace MeadowApp
         public MeadowApp()
         {
             Console.WriteLine("Tetris");
-            Init();
 
-            Console.WriteLine("Start game");
+            Initialize();
             StartGameLoop();
+        }
+
+        void Initialize()
+        {
+            Console.WriteLine("Initializing hardware...");
+            display = new Max7219(
+                device: Device,
+                spiBus: Device.CreateSpiBus(),
+                csPin: Device.Pins.D01,
+                deviceCount: 4,
+                maxMode: Max7219.Max7219Type.Display);
+
+            graphics = new GraphicsLibrary(display);
+            graphics.CurrentFont = new Font4x8();
+            graphics.Rotation = GraphicsLibrary.RotationType._180Degrees;
+            portLeft = Device.CreateDigitalInputPort(Device.Pins.D12);
+            portUp = Device.CreateDigitalInputPort(Device.Pins.D13);
+            portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
+            portDown = Device.CreateDigitalInputPort(Device.Pins.D11);
+            Console.WriteLine("Done initializing...");
         }
 
         int tick = 0;
         void StartGameLoop()
         {
+            Console.WriteLine("Start game...");
             while (true)
             {
                 tick++;
@@ -103,25 +117,6 @@ namespace MeadowApp
                     }
                 }
             }
-        }
-
-        void Init()
-        {
-            Console.WriteLine("Init");
-            display = new Max7219(
-                device: Device,
-                spiBus: Device.CreateSpiBus(),
-                csPin: Device.Pins.D01,
-                deviceCount: 4,
-                maxMode: Max7219.Max7219Type.Display);
-
-            graphics = new GraphicsLibrary(display);
-            graphics.CurrentFont = new Font4x8();
-            graphics.Rotation = GraphicsLibrary.RotationType._180Degrees;
-            portLeft = Device.CreateDigitalInputPort(Device.Pins.D12);
-            portUp = Device.CreateDigitalInputPort(Device.Pins.D13);
-            portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
-            portDown = Device.CreateDigitalInputPort(Device.Pins.D11);
         }
     }
 }
