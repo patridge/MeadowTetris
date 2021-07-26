@@ -69,6 +69,9 @@ namespace Tetris
 
             Init();
             Reset();
+
+            // TODO: Delete after fixing 99->100 bug
+            LinesCleared = 99;
         }
 
         void Init()

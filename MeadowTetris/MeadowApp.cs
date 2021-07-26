@@ -89,9 +89,19 @@ namespace MeadowTetris
 
         void CheckInput(int tick)
         {
+            //if (game.LinesCleared == 100)
+            //{
+            //    Console.WriteLine("100 pre-CheckInput"); // This was NOT hit before crash, so it crashed before next game look CheckInput.
+            //}
+
             if (tick % (21 - game.Level) == 0)
             {
                 game.OnDown(true);
+
+                //if (game.LinesCleared == 100)
+                //{
+                //    Console.WriteLine("100 post-game.OnDown ticks"); // This was hit before crash
+                //}
             }
 
             if (portLeft.State == true)
@@ -114,6 +124,11 @@ namespace MeadowTetris
 
         void DrawTetrisField()
         {
+            //if (game.LinesCleared == 100)
+            //{
+            //    Console.WriteLine("100 pre-write"); // This was hit before crash
+            //}
+            // TODO: Figure out what is crashing when drawing 100 to space for 99.
             graphics.DrawText(0, 0, $"{game.LinesCleared}");
             int yOffset = 8;
             //draw current piece
