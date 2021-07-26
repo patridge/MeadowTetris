@@ -61,7 +61,7 @@ namespace MeadowTetris
             graphics.CurrentFont = new Font4x8();
             graphics.Rotation = GraphicsLibrary.RotationType._180Degrees;
             //portLeft = Device.CreateDigitalInputPort(Device.Pins.D12);
-            buttonLeft = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D12));
+            buttonLeft = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D12)); // , InterruptMode.EdgeBoth)); <- Causes it to hang
             //portUp = Device.CreateDigitalInputPort(Device.Pins.D13);
             buttonUp = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D13));
             //portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
