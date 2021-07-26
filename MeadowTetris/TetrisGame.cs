@@ -147,6 +147,20 @@ namespace Tetris
         {
             public int Score { get; set; } = 0;
         }
+        public void OnDrop()
+        {
+            var isNextPositionValid = IsPositionValid(CurrentPiece.X, CurrentPiece.Y + 1,
+                CurrentPiece.Rotation, Tetraminos[CurrentPiece.PieceType]) == true;
+            while (isNextPositionValid)
+            {
+                if (isNextPositionValid)
+                {
+                    CurrentPiece.Y += 1;
+                }
+                isNextPositionValid = IsPositionValid(CurrentPiece.X, CurrentPiece.Y + 1,
+                    CurrentPiece.Rotation, Tetraminos[CurrentPiece.PieceType]) == true;
+            }
+        }
         public void OnDown(bool setOnFail = false)
         {
             if (IsPositionValid(CurrentPiece.X, CurrentPiece.Y + 1,
