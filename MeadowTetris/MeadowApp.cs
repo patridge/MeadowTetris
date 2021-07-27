@@ -30,8 +30,9 @@ namespace MeadowTetris
             _ = Task.Run(async () =>
             {
                 await Initialize();
-            }).ContinueWith((_) =>
+            }).ContinueWith(async (_) =>
             {
+                await DisplayPreGame();
                 StartGameLoop();
             });
         }
@@ -140,6 +141,16 @@ namespace MeadowTetris
                     }
                 }
             }
+        }
+
+        async Task DisplayPreGame()
+        {
+            Console.WriteLine("Show high score");
+            graphics.Clear();
+            graphics.DrawText(0, 0, "HS");
+            graphics.DrawText(0, 8, gameData.HighScore.ToString());
+            graphics.Show();
+            await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
 }
