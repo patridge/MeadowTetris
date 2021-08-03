@@ -6,6 +6,7 @@ using Meadow;
 using Meadow.Devices;
 using Meadow.Foundation.Displays;
 using Meadow.Foundation.Graphics;
+using Meadow.Foundation.Sensors.Buttons;
 using Meadow.Hardware;
 using Tetris;
 using static Tetris.TetrisGame;
@@ -16,10 +17,14 @@ namespace MeadowTetris
     {
         Max7219 display;
         GraphicsLibrary graphics;
-        IDigitalInputPort portLeft;
-        IDigitalInputPort portUp;
-        IDigitalInputPort portRight;
-        IDigitalInputPort portDown;
+        //IDigitalInputPort portLeft;
+        PushButton buttonLeft;
+        //IDigitalInputPort portUp;
+        PushButton buttonUp;
+        //IDigitalInputPort portRight;
+        PushButton buttonRight;
+        //IDigitalInputPort portDown;
+        PushButton buttonDown;
         TetrisGame game = new TetrisGame(8, 24);
         GameData gameData;
 
@@ -33,6 +38,7 @@ namespace MeadowTetris
             }).ContinueWith(async (_) =>
             {
                 await DisplayPreGame();
+                AssignButtonHandlers();
                 StartGameLoop();
             });
         }
@@ -55,11 +61,41 @@ namespace MeadowTetris
             graphics = new GraphicsLibrary(display);
             graphics.CurrentFont = new Font4x8();
             graphics.Rotation = GraphicsLibrary.RotationType._180Degrees;
-            portLeft = Device.CreateDigitalInputPort(Device.Pins.D12);
-            portUp = Device.CreateDigitalInputPort(Device.Pins.D13);
-            portRight = Device.CreateDigitalInputPort(Device.Pins.D07);
-            portDown = Device.CreateDigitalInputPort(Device.Pins.D11);
+            buttonLeft = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D12, interruptMode: InterruptMode.EdgeFalling, resistorMode: ResistorMode.ExternalPullDown)); // , InterruptMode.EdgeBoth)); <- Caused it to hang without explicit external resistor mode set
+            buttonUp = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D13, interruptMode: InterruptMode.EdgeFalling, resistorMode: ResistorMode.ExternalPullDown));
+            buttonRight = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D07, interruptMode: InterruptMode.EdgeFalling, resistorMode: ResistorMode.ExternalPullDown));
+            buttonDown = new PushButton(Device.CreateDigitalInputPort(Device.Pins.D11, interruptMode: InterruptMode.EdgeFalling, resistorMode: ResistorMode.ExternalPullDown));
             Console.WriteLine("Done initializing...");
+        }
+
+        private void AssignButtonHandlers()
+        {
+            Console.WriteLine($"Assinging button handlers");
+            buttonLeft.Clicked += ButtonLeft_Clicked;
+            buttonRight.Clicked += ButtonRight_Clicked;
+            buttonUp.Clicked += ButtonUp_Clicked;
+            buttonDown.Clicked += ButtonDown_Clicked;
+        }
+
+        private void ButtonLeft_Clicked(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Left");
+            game.OnLeft();
+        }
+        private void ButtonRight_Clicked(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Right");
+            game.OnRight();
+        }
+        private void ButtonUp_Clicked(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Up");
+            game.OnRotate();
+        }
+        private void ButtonDown_Clicked(object sender, EventArgs e)
+        {
+            Console.WriteLine($"Down");
+            game.OnDrop();
         }
 
         private async void Game_GameLost(object sender, GameLostEventArgs e)
@@ -78,7 +114,7 @@ namespace MeadowTetris
             while (true)
             {
                 tick++;
-                CheckInput(tick);
+                CheckForPieceDrop(tick);
 
                 graphics.Clear();
                 DrawTetrisField();
@@ -88,28 +124,11 @@ namespace MeadowTetris
             }
         }
 
-        void CheckInput(int tick)
+        void CheckForPieceDrop(int tick)
         {
             if (tick % (21 - game.Level) == 0)
             {
                 game.OnDown(true);
-            }
-
-            if (portLeft.State == true)
-            {
-                game.OnLeft();
-            }
-            else if (portRight.State == true)
-            {
-                game.OnRight();
-            }
-            else if (portUp.State == true)
-            {
-                game.OnRotate();
-            }
-            else if (portDown.State == true)
-            {
-                game.OnDown();
             }
         }
 
